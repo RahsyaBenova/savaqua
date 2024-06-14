@@ -12,19 +12,19 @@ app = Flask(__name__)
 data = []
 
 # MQTT settings
-MQTT_BROKER = "c0ae257fb0f1403bb96d10c278d890ee.s1.eu.hivemq.cloud"
-MQTT_PORT = 8883
-MQTT_TOPIC_TEMPERATURE = "dht22/temperature"
-MQTT_TOPIC_HUMIDITY = "dht22/humidity"
-MQTT_USERNAME = "savaqua"
-MQTT_PASSWORD = "Savaqua123"
+LINK_MQTT = "c0ae257fb0f1403bb96d10c278d890ee.s1.eu.hivemq.cloud"
+PORT_MQTT = 8883
+TOPIC_SUHU = "data/sensor/suhu"
+TOPIC_KELEMBAPAN = "data/sensor/kelembapan"
+USERNAME_MQTT = "savaqua"
+PASSWORD_MQTT = "Savaqua123"
 
 # MQTT client
 mqtt_client = mqtt.Client()
 
 def on_connect(client, userdata, flags, rc):
     print(f"Connected with result code {rc}")
-    client.subscribe([(MQTT_TOPIC_TEMPERATURE, 0), (MQTT_TOPIC_HUMIDITY, 0)])
+    client.subscribe([(TOPIC_SUHU, 0), (TOPIC_KELEMBAPAN, 0)])
 
 def on_message(client, userdata, msg):
     topic = msg.topic
@@ -32,9 +32,9 @@ def on_message(client, userdata, msg):
     print(f"Received message '{payload}' on topic '{topic}'")
 
     # Process message and update data
-    if topic == MQTT_TOPIC_TEMPERATURE:
+    if topic == TOPIC_SUHU:
         update_data('temperature', str(payload))
-    elif topic == MQTT_TOPIC_HUMIDITY:
+    elif topic == TOPIC_KELEMBAPAN:
         update_data('humidity', str(payload))
 
 def update_data(key, value):
@@ -53,13 +53,13 @@ def update_data(key, value):
         data.append(new_data)
 
 # Setup MQTT client
-mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+mqtt_client.username_pw_set(USERNAME_MQTT, PASSWORD_MQTT)
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 mqtt_client.tls_set()  # Enable TLS for secure connection
 
 def start_mqtt():
-    mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    mqtt_client.connect(LINK_MQTT, PORT_MQTT, 60)
     mqtt_client.loop_forever()
 
 # Start MQTT client in a separate thread
@@ -76,7 +76,7 @@ def get_data_by_id(id):
     if result:
         return jsonify(result)
     else:
-        return jsonify({'message': 'Data not found'}), 404
+        return jsonify({'message': 'Data tidak ditemukan'}), 404
 
 @app.route('/api/data', methods=['POST'])
 def add_data():
@@ -91,7 +91,7 @@ def add_data():
         'humidity': req_data['humidity']
     }
     data.append(new_data)
-    return jsonify({'message': 'Data added successfully', 'data': new_data}), 201
+    return jsonify({'message': 'Data sukses diterima', 'data': new_data}), 201
 
 if __name__ == '__main__':
     app.run(debug=True, port=1234)

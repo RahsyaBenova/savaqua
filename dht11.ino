@@ -2,19 +2,18 @@
 #include "PubSubClient.h"
 #include <WiFiClientSecure.h>
 #include <DHT.h>
+#define DHTPIN 4
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
 
-/****** WiFi Connection Details silahkan disesuaikan *******/
 const char* ssid = "OrangGantengPekanbaru";
 const char* password = "12345678";
-
-//---- HiveMQ Cloud Broker settings
 const char* mqtt_server = "c0ae257fb0f1403bb96d10c278d890ee.s1.eu.hivemq.cloud";
 const char* mqtt_username = "savaqua";
 const char* topic = "/sensor/data";
 const char* mqtt_password = "Savaqua123";
 const int mqtt_port = 8883;
 
-// HiveMQ Cloud Let's Encrypt CA certificate
 static const char *root_ca PROGMEM = R"EOF(
 -----BEGIN CERTIFICATE-----
 MIIFazCCA1OgAwIBAgIRAIIQz7DSQONZRGPgu2OCiwAwDQYJKoZIhvcNAQELBQAw
@@ -49,10 +48,6 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 -----END CERTIFICATE-----
 )EOF";
 
-// DHT22 setup
-#define DHTPIN 4
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
 
 WiFiClientSecure espClient;  
 PubSubClient client(espClient);
@@ -136,14 +131,14 @@ void loop() {
     float humidity = dht.readHumidity();
 
     if (isnan(temperature) || isnan(humidity)) {
-      Serial.println("Failed to read from DHT sensor!");
+      Serial.println("Gagal membaca DHT11!");
       return;
     }
 
-    snprintf(msg, MSG_BUFFER_SIZE, "Temperature: %.2f °C, Humidity: %.2f %%", temperature, humidity);
-    Serial.print("Publish message: ");
+    snprintf(msg, MSG_BUFFER_SIZE, "Suhu: %.2f °C, Kelembapan: %.2f %%", temperature, humidity);
+    Serial.print("Publish pesan: ");
     Serial.println(msg);
-    client.publish("dht22/temperature", String(temperature).c_str());
-    client.publish("dht22/humidity", String(humidity).c_str());
+    client.publish("data/sensor/suhu", String(temperature).c_str());
+    client.publish("data/sensor/kelembapan", String(humidity).c_str());
   }
 }
