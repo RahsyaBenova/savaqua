@@ -89,16 +89,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void reconnect() {
   while (!client.connected()) {
-    Serial.print("Attempting MQTT connection… ");
+    Serial.print("Menghubungi MQTT.. ");
     String clientId = "ESP32Client";
     if (client.connect(clientId.c_str(), mqtt_username, mqtt_password)) {
       Serial.println("connected!");
-      client.publish("testTopic", "Hello World!");
-      client.subscribe("testTopic");
     } else {
       Serial.print("failed, rc = ");
       Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
+      Serial.println(" Coba lagi dalam 5 detik");
       delay(5000);
     }
   }
